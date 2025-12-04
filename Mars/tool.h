@@ -1,7 +1,7 @@
 #ifndef TOOL_H
 #define TOOL_H
 
-#include <stdlib.h>
+#include "mars.h"
 
 char* _Mstrdup(char* s);
 

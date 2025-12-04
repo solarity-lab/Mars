@@ -34,3 +34,9 @@ CodePrint
 (struct Code* code) {
     return;
 }
+
+void CodeAddCode(struct Code *dest, struct Code *src) {
+    for (int i = 0; i < src->size; i++) {
+        CodeAdd(dest, src->code[i]);
+    }
+}

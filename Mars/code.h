@@ -1,7 +1,7 @@
 #ifndef CODE_H
 #define CODE_H
 
-#include <stdlib.h>
+#include "mars.h"
 
 #define OP_PUSH '\x01'
 #define OP_POP '\x02'
@@ -17,25 +17,24 @@
 
 typedef unsigned char byte;
 
-struct Code {
-    byte* code;
+#define NULL_CODE CodeNew()
+
+struct Code
+{
+    byte *code;
     int size;
     int capacity;
 };
 
-struct Code*
+struct Code *
 CodeNew(void);
 
-int
-CodeFree
-(struct Code* code);
+int CodeFree(struct Code *code);
 
-void
-CodeAdd
-(struct Code* code, byte op);
+void CodeAdd(struct Code *code, byte op);
 
-void
-CodePrint
-(struct Code* code);
+void CodeAddCode(struct Code *dest, struct Code *src);
+
+void CodePrint(struct Code *code);
 
 #endif // CODE_H

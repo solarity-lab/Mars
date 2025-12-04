@@ -1,16 +1,13 @@
 #ifndef AST_H
 #define AST_H
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
+#include "mars.h"
 #include "token.h"
 
 #define MAX_STATEMENT_SIZE 1024
 
 enum AST_TYPE {
-    AST_BINARY_EXPRESSION, AST_LITERAL, AST_IDENTIFER, AST_PUSH, AST_POP, AST_PRINT, AST_NONE, AST_PROGRAM
+    AST_BINARY_EXPRESSION, AST_LITERAL, AST_IDENTIFER, AST_PUSH, AST_POP, AST_PRINT, AST_NONE, AST_PROGRAM, AST_SET
 };
 
 struct Ast {

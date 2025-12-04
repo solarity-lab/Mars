@@ -1,8 +1,7 @@
 #ifndef SCOPE_H
 #define SCOPE_H
 
-#include <stdlib.h>
-#include <string.h>
+#include "mars.h"
 #include "tool.h"
 
 #define NOT_FOUND -999
