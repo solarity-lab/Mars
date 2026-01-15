@@ -28,6 +28,9 @@ struct ProtoFormat *ProtoNew(void) {
     proto->pc = 0;
     proto->prev = NULL;
 
+    proto->labels.count = 0;
+    proto->labels.labels = NULL;
+
     proto->gc = NULL;
     return proto;
 }
@@ -63,9 +66,6 @@ Flag ProtoStackPop(struct ProtoFormat* proto) {
 }
 
 struct Object* ProtoStackTake(struct ProtoFormat* proto) {
-    if (proto->s_size <= 0) {
-        return -1;
-    }
     struct Object* pop = proto->s[proto->s_size - 1];
 
     DECR_REF(pop);
@@ -178,4 +178,9 @@ struct Object* ProtoStoreLocal(struct ProtoFormat *proto, address_t address, str
     proto->l[proto->l_size++] = scope;
 
     return scope;
+}
+
+int ProtoPushNum(struct ProtoFormat* proto, float f) {
+    struct Object* num = ObjectMakeFloat(f);
+    return ProtoStackPush(proto, num);
 }

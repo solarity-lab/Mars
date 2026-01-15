@@ -39,6 +39,8 @@ struct mast* mparser_statement(struct mparser* parser) {
         return mparser_function_declaration(parser);
     if (parser->token->type == T_RETURN)
         return mparser_return_statement(parser);
+    if (parser->token->type == T_PRINT)
+        return mparser_PRINT(parser);
 
     return mparser_condition(parser);
 }
@@ -207,7 +209,7 @@ struct mast* mparser_while_statement(struct mparser* parser) {
 }
 
 struct mast* mparser_function_declaration(struct mparser* parser) {
-    struct mast* func_node = mast_init(AST_FUNCTION_STATEMENT, NULL, 0);
+    struct mast* func_node = mast_init(AST_FUNCTION, NULL, 0);
     parser_expected(parser, T_FUNC);
     parser_next_token(parser);
     
@@ -236,7 +238,7 @@ struct mast* mparser_function_declaration(struct mparser* parser) {
 }
 
 struct mast* mparser_function_call(struct mparser* parser, struct mast* callee) {
-    struct mast* call_node = mast_init(AST_FUNCTION_CALL_EXPRESSION, NULL, 0);
+    struct mast* call_node = mast_init(AST_FUNCTION_CALL, NULL, 0);
 
     call_node->callee = callee;
 
@@ -265,7 +267,7 @@ struct mast* mparser_function_call(struct mparser* parser, struct mast* callee) 
 }
 
 struct mast* mparser_return_statement(struct mparser* parser) {
-    struct mast* return_node = mast_init(AST_RETURN_STATEMENT, NULL, 0);
+    struct mast* return_node = mast_init(AST_RETURN, NULL, 0);
 
     parser_expected(parser, T_RETURN);
 
@@ -274,4 +276,15 @@ struct mast* mparser_return_statement(struct mparser* parser) {
     mast_not_statement(return_node->expr, pline(parser), prow(parser), pfile(parser));
 
     return return_node;
+}
+
+struct mast* mparser_PRINT(struct mparser* parser) {
+    struct mast* print_node = mast_init(AST_PRINT, NULL, 0);
+
+    parser_expected(parser, T_PRINT);
+
+    parser_next_token(parser);
+    print_node->expr = mparser_statement(parser);
+    mast_not_statement(print_node->expr, pline(parser), prow(parser), pfile(parser));
+    return print_node;
 }

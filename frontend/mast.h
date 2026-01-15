@@ -8,29 +8,17 @@ enum AST_TYPE {
     AST_PROGRAM,
     AST_BLOCK,
     AST_STATEMENT,
-    AST_EXPRESSION,
-    AST_BREAK,
-    AST_CONTINUE,
     AST_ASSIGNMENT,
     AST_IF,
-    AST_ANONYMOUS_FUNCTION,
     AST_WHILE,
-    AST_COMPARE_EXPRESSION,
-    AST_AND_EXPRESSION,
-    AST_RETURN_STATEMENT,
-    AST_OR_EXPRESSION,
-    AST_STORE_INDEX,
-    AST_TRUE,
-    AST_FALSE,
-    AST_NOT_EXPRESSION,
-    AST_FUNCTION_CALL_EXPRESSION,
-    AST_FUNCTION_STATEMENT,
+    AST_RETURN,
+    AST_FUNCTION_CALL,
+    AST_FUNCTION,
     AST_FOR,
     AST_BINARY_EXPRESSION,
     AST_IDENTIFIER,
     AST_LITERAL,
-    AST_STRING_EXPRESSION,
-    AST_LIST,
+    AST_PRINT,
     AST_NULL,
 };
 
@@ -88,6 +76,8 @@ int mast_add_argument(struct mast* mast, struct mast* argument);
 struct mast* mast_binary_expr(struct mast *left, struct mast *right, enum TOKEN op);
 
 int mast_not_statement(struct mast* mast, int line, int row, char* file);
+
+int is_ast_expr(struct mast* mast);
 
 void mast_print(struct mast* mast);
 

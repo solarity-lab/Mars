@@ -50,6 +50,9 @@ struct mast* mparser_while_statement(struct mparser* parser);
 struct mast* mparser_function_declaration(struct mparser* parser);
 struct mast* mparser_return_statement(struct mparser* parser);
 
+// excel
+struct mast* mparser_PRINT(struct mparser* parser);
+
 // special
 struct mast* mparser_function_call(struct mparser* parser, struct mast* callee);
 

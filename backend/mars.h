@@ -2,6 +2,11 @@
 #define MARS_H
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+#include <stdio.h>
 
 /* Mars Virtual Machine Definitions 
     - File này cung cấp những kiểu dữ liệu riêng cho mars, để có thể tương thích với mọi loại máy bao gồm: 64-bit, 32-bit, ...
@@ -50,7 +55,5 @@ typedef unsigned char    Flag;
 /*
     Cung cấp các file cần thiết bao gồm thư viện C, thư viện Mars, ...
 */
-#include "mobj.h"
-#include "mproto.h"
 
 #endif // MARS_H

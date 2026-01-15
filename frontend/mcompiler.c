@@ -43,6 +43,10 @@ struct mcode* mcompiler_compile_ast_program(struct mast* ast, struct mcompiler *
         struct mcode *code = mcompiler_compile(ast->parent[i], compiler, envi);
 
         INSERT(program, code);
+
+        if (is_ast_expr(child)) {
+            PUSH(program, OKPOP);
+        }
     }
 
     PUSH(program, OKHALT);
@@ -59,9 +63,10 @@ struct mcode* mcompiler_compile(struct mast* ast, struct mcompiler *compiler, st
         case AST_ASSIGNMENT: return mcompiler_compile_ast_assign(ast, compiler, envi);
         case AST_IF: return mcompiler_compile_ast_if(ast, compiler, envi);
         case AST_WHILE: return mcompiler_compile_ast_while(ast, compiler, envi);
-        case AST_FUNCTION_CALL_EXPRESSION: return mcompiler_compile_ast_function_call(ast, compiler, envi);
-        case AST_FUNCTION_STATEMENT: return mcompiler_compile_ast_function_declaration(ast, compiler, envi);
-        case AST_RETURN_STATEMENT: return mcompiler_compile_ast_return(ast, compiler, envi);
+        case AST_FUNCTION_CALL: return mcompiler_compile_ast_function_call(ast, compiler, envi);
+        case AST_FUNCTION: return mcompiler_compile_ast_function_declaration(ast, compiler, envi);
+        case AST_RETURN: return mcompiler_compile_ast_return(ast, compiler, envi);
+        case AST_PRINT: return mcompiler_compile_ast_PRINT(ast, compiler, envi);
     }
 
     error_at("Unknown AST node type in compiler", "<main>", 0, 0);
@@ -314,6 +319,10 @@ struct mcode* mcompiler_compile_block(struct mast** block, int block_size, struc
         struct mcode *code = mcompiler_compile(block[i], compiler, envi);
 
         INSERT(block_code, code);
+
+        if (is_ast_expr(child)) {
+            PUSH(block_code, OKPOP);
+        }
     }
 
     return block_code;
@@ -342,4 +351,12 @@ struct mcode* mcompiler_compile_ast_block(struct mast* ast, struct mcompiler *co
     local_envi->global = envi->global;
 
     return mcompiler_compile_block(ast->block, ast->block_index, compiler, local_envi);
+}
+
+struct mcode* mcompiler_compile_ast_PRINT(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
+    CHECKIFNULL(ast);
+
+    struct mcode* code = mcompiler_compile(ast->expr, compiler, envi);
+    PUSH(code, OKPRINT);
+    return code;
 }

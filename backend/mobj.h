@@ -21,15 +21,10 @@ enum ObjectType {
     O_ARRAY, // mảng [obj1, obj2, ...]
     O_PROTO, // Proto dùng cho hàm, hoặc thread
     O_CLOSURE, // closure, kiểu đặc biệt dành cho hàm
-    O_NULL // kiểu mặc định NULL
-};
+    O_NULL, // kiểu mặc định NULL
 
-struct MValue {
-    union {
-        int _b;         // boolen
-        float f;        // float
-        long l;         // long
-    };
+    O_GLOBAL,
+    O_LOCAL,
 };
 
 struct Object {
@@ -38,7 +33,7 @@ struct Object {
     address_t address;      // địa chỉ ảo, dùng cho biến
 
     enum ObjectType type;   // kiểu dữ liệu của object
-    struct MValue value;    // giá trị chính của object
+    float value;            // giá trị chính của object
 
     struct Object* f_value; // giá trị của biến, biến sẽ có dự liệu tham chiếu đến field này
 
@@ -56,7 +51,6 @@ struct Object* ObjectNew(void);
 
 struct Object* ObjectMakeFloat(float f);
 struct Object* ObjectMakeBool(int _b);
-struct Object* ObjectMakeLong(long l);
 
 // hàm giải phóng
 int ObjectFree(struct Object* object);

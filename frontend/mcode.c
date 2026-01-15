@@ -56,7 +56,7 @@ int mcode_print(struct mcode* mcode) {
             case OKHALT: printf("HALT\n"); break;
             case OKPOP:  printf("POP\n"); break;
             case OKCALL: printf("CALL\n"); break;
-            
+
             case OKJMP: {
                 unsigned char addr = mcode->bytecode[i++];
                 printf("JMP %d\n", addr);

@@ -10,7 +10,11 @@
 
 #include "mobj.h" // dùng struct MValue cho bảng hằng số
 #include "mars.h" // dùng cho mã máy
-#include "mgc.h"
+#include "mgc.h"  // Garbage Collector
+#include "mlabel.h" // label
+
+enum ObjectType;
+struct ProgramLabel;
 
 struct ProtoFormat {
     struct Object** para;           // tham số (parameter) dùng cho hàm
@@ -38,6 +42,8 @@ struct ProtoFormat {
     struct ProtoFormat* prev;       // ProtoFormat trước dùng cho tra các ProtoFormat lồng nhau
 
     int pc;                         // bộ đếm bytecode (program counter)
+
+    struct ProgramLabel labels;
 
     struct GarbageCollector* gc;
 };
@@ -98,5 +104,11 @@ struct Object* ProtoStoreGlobal(struct ProtoFormat *proto, address_t address, st
 */
 struct Object* ProtoLoadLocal(struct ProtoFormat *proto, address_t address);
 struct Object* ProtoStoreLocal(struct ProtoFormat *proto, address_t address, struct Object* value, enum ObjectType type);
+
+/*
+    Các hàm hỗ trợ khác
+*/
+
+int ProtoPushNum(struct ProtoFormat* proto, float f);
 
 #endif // MPROTO_H

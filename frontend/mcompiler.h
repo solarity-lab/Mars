@@ -55,14 +55,13 @@ struct mcode* mcompiler_compile_ast_block(struct mast* ast, struct mcompiler *co
 
 // statement
 struct mcode* mcompiler_compile_ast_assign(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
-
 struct mcode* mcompiler_compile_ast_if(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
-
 struct mcode* mcompiler_compile_ast_while(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
-
 struct mcode* mcompiler_compile_ast_function_declaration(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
-
 struct mcode* mcompiler_compile_ast_return(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
+
+// excel
+struct mcode* mcompiler_compile_ast_PRINT(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
 
 // special
 struct mcode* mcompiler_compile_block(struct mast** block, int block_size, struct mcompiler *compiler, struct menvi *envi);

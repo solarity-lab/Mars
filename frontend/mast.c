@@ -110,24 +110,22 @@ void mast_print(struct mast* mast) {
     printf("%s\n", mast->lexeme);
 }
 
+int is_ast_expr(struct mast* mast) {
+    enum AST_TYPE type = mast->type;
+    if (type == AST_BINARY_EXPRESSION 
+        || type == AST_FUNCTION_CALL
+        || type == AST_IDENTIFIER
+        || type == AST_LITERAL
+        || type == AST_NULL) {
+        return 1;
+    }
+    return 0;
+}
+
 int mast_not_statement(struct mast* mast, int line, int row, char* file) {
     if (!mast) return 0;
 
-    enum AST_TYPE type = mast->type;
-    if (type == AST_BINARY_EXPRESSION 
-        || type == AST_COMPARE_EXPRESSION 
-        || type == AST_AND_EXPRESSION 
-        || type == AST_OR_EXPRESSION
-        || type == AST_NOT_EXPRESSION
-        || type == AST_FUNCTION_CALL_EXPRESSION
-        || type == AST_IDENTIFIER
-        || type == AST_LITERAL
-        || type == AST_STRING_EXPRESSION
-        || type == AST_LIST
-        || type == AST_TRUE
-        || type == AST_FALSE
-        || type == AST_NULL
-        || type == AST_ANONYMOUS_FUNCTION) {
+    if (is_ast_expr(mast)) {
         return 1;
     }
 
