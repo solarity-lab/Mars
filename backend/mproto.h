@@ -12,6 +12,7 @@
 #include "mars.h" // dùng cho mã máy
 #include "mgc.h"  // Garbage Collector
 #include "mlabel.h" // label
+#include "mgrid.h"
 
 enum ObjectType;
 struct ProgramLabel;
@@ -44,6 +45,8 @@ struct ProtoFormat {
     int pc;                         // bộ đếm bytecode (program counter)
 
     struct ProgramLabel labels;
+
+    struct Grid* grid;
 
     struct GarbageCollector* gc;
 };

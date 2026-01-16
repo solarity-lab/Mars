@@ -69,6 +69,7 @@ struct Object* ProtoStackTake(struct ProtoFormat* proto) {
     struct Object* pop = proto->s[proto->s_size - 1];
 
     DECR_REF(pop);
+    GCmove(proto->gc, pop);
 
     proto->s_size--;
     return pop;

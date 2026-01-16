@@ -163,3 +163,24 @@ int mcode_print(struct mcode* mcode) {
 
     return 0;
 }
+
+int __mcode(struct mcode* mcode, ...) {
+    if (!mcode) return -1;
+
+    va_list args;
+    va_start(args, mcode);
+
+    int op;
+    int count = 0;
+
+    while ((op = va_arg(args, int)) != -1) {
+        if (mcode_add_op(mcode, (unsigned char)op) != 0) {
+            va_end(args);
+            return -1;
+        }
+        count++;
+    }
+
+    va_end(args);
+    return count;
+}

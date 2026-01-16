@@ -58,7 +58,8 @@ int GCStartClean(struct GarbageCollector* gc);
 
 /*
     Giai đoạn Quét III (Sweep):
-    Duyệt toàn bộ danh sách những object trong bể nếu dữ liệu đó ko còn tham chiếu thì free
+    Duyệt toàn bộ danh sách bộ nhớ đã cấp phát, giải phóng (free)
+    những Object không được đánh dấu ở bước Mark.
 */
 int GCSweep(struct GarbageCollector* gc);
 
@@ -67,6 +68,5 @@ int GCSweep(struct GarbageCollector* gc);
     tắt garbage collector, không còn hoạt động
 */
 #define GCDeactivate(gc) ((gc)->activated = 0)
-
 
 #endif // MGC_H
