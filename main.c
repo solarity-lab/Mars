@@ -12,10 +12,6 @@
 #include "./backend/meval.h"
 #include "./backend/mvm.h"
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 int main(int argc, char** argv) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <source-file>\n", argv[0]);
