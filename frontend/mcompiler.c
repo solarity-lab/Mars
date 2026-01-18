@@ -1,4 +1,5 @@
 #include "mcompiler.h"
+#include "mtool.h"
 
 int push_loop(struct mcompiler *comp, struct loop_stack ls) {
     comp->ls[comp->ls_size++] = ls;
@@ -140,7 +141,7 @@ struct mcode* mcompiler_compile_ast_identifer(struct mast* ast, struct mcompiler
     struct scope* scope = fine_scope(envi, ast->lexeme);
 
     if (!scope) {
-        error_type("Undefined variable", COMPILER_ERR);
+        error_type(__Mstring("Undefined variable '%s'", ast->lexeme), COMPILER_ERR);
     }
 
     struct mcode* code = NULL_CODE;
@@ -197,7 +198,7 @@ struct mcode* mcompiler_compile_ast_if(struct mast* ast, struct mcompiler *compi
     PUSH(code, OKJMP_IF_FALSE);
     PUSH(code, else_label);
 
-    struct mcode* if_body = mcompiler_compile_ast_body(ast->if_body, compiler, envi);
+    struct mcode* if_body = mcompiler_compile_ast_block(ast->if_body, compiler, envi);
     INSERT(code, if_body);
 
     PUSH(code, OKJMP);
@@ -207,7 +208,7 @@ struct mcode* mcompiler_compile_ast_if(struct mast* ast, struct mcompiler *compi
     PUSH(code, else_label);
 
     if (ast->else_body) {
-        struct mcode* else_body = mcompiler_compile_ast_body(ast->else_body, compiler, envi);
+        struct mcode* else_body = mcompiler_compile_ast_block(ast->else_body, compiler, envi);
         INSERT(code, else_body);
     }
 
@@ -233,7 +234,7 @@ struct mcode* mcompiler_compile_ast_while(struct mast* ast, struct mcompiler *co
     PUSH(code, OKJMP_IF_FALSE);
     PUSH(code, end_label);
 
-    struct mcode* body = mcompiler_compile_ast_body(ast->body, compiler, envi);
+    struct mcode* body = mcompiler_compile_ast_block(ast->body, compiler, envi);
     INSERT(code, body);
 
     PUSH(code, OKJMP);
@@ -342,6 +343,7 @@ struct mcode* mcompiler_compile_block(struct mast** block, int block_size, struc
 }
 
 // block & body
+
 struct mcode* mcompiler_compile_ast_body(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
     CHECKIFNULL(ast);
 
@@ -357,14 +359,10 @@ struct mcode* mcompiler_compile_ast_body(struct mast* ast, struct mcompiler *com
 struct mcode* mcompiler_compile_ast_block(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
     CHECKIFNULL(ast);
 
-    struct menvi* local_envi = menvi_new();
-
-    local_envi->prev = envi;
-    local_envi->is_local = 1;
-    local_envi->global = envi->global;
-
-    return mcompiler_compile_block(ast->block, ast->block_index, compiler, local_envi);
+    return mcompiler_compile_block(ast->block, ast->block_index, compiler, envi);
 }
+
+// control
 
 struct mcode* mcompiler_compile_ast_PRINT(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
     CHECKIFNULL(ast);

@@ -35,10 +35,10 @@ struct mast* mparser_statement(struct mparser* parser) {
         return mparser_if_statement(parser);
     else if (parser->token->type == T_WHILE)
         return mparser_while_statement(parser);
-    else if (parser->token->type == T_FUNC)
-        return mparser_function_declaration(parser);
-    else if (parser->token->type == T_RETURN)
-        return mparser_return_statement(parser);
+    // else if (parser->token->type == T_FUNC)
+        // return mparser_function_declaration(parser);
+    // else if (parser->token->type == T_RETURN)
+        // return mparser_return_statement(parser);
 
     else if (parser->token->type == T_PRINT)
         return mparser_PRINT(parser);
