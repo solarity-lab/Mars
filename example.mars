@@ -1,0 +1,19 @@
+width = 16
+height = 16
+
+CREAT width, height
+MOVE 0, 0
+
+i = 0
+while i < height do
+    j = 0
+    while j < width do
+        MOVE i, j
+        WRITE i + j
+        j = j + 1
+    end
+    i = i + 1
+end
+
+READ
+CLOSE
