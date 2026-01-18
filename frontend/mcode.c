@@ -143,6 +143,13 @@ int mcode_print(struct mcode* mcode) {
                 break;
             }
 
+            case CCMOVE_TO: printf("MOVE_TO\n"); break;
+            case CCWRITE: printf("WRITE\n"); break;
+            case CCERASE: printf("ERASE\n"); break;
+            case CCREAD: printf("READ\n"); break;
+            case CCCLOSE: printf("CLOSE\n"); break;
+            case CCCREATE: printf("CREATE\n"); break;
+            
             case OKRETURN: printf("RETURN\n"); break;
             case OKSTART_FUNC: printf("START_FUNC\n"); break;
             case OKEND_FUNC: printf("END_FUNC\n"); break;
@@ -183,4 +190,29 @@ int __mcode(struct mcode* mcode, ...) {
 
     va_end(args);
     return count;
+}
+
+struct mcode* __mcode_create(int first, ...) {
+    if (first == -1)
+        return NULL_CODE;
+
+    struct mcode* mcode = mcode_new();
+    if (!mcode)
+        return NULL_CODE;
+
+    va_list args;
+    va_start(args, first);
+
+    int op = first;
+    while (op != -1) {
+        if (mcode_add_op(mcode, (unsigned char)op) != 0) {
+            va_end(args);
+            mcode_free(mcode);
+            return NULL_CODE;
+        }
+        op = va_arg(args, int);
+    }
+
+    va_end(args);
+    return mcode;
 }

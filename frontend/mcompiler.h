@@ -62,6 +62,9 @@ struct mcode* mcompiler_compile_ast_return(struct mast* ast, struct mcompiler *c
 
 // excel
 struct mcode* mcompiler_compile_ast_PRINT(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
+struct mcode* mcompiler_compile_ast_WRITE(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
+struct mcode* mcompiler_compile_ast_MOVE_TO(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
+struct mcode* mcompiler_compile_ast_CREATE(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
 
 // special
 struct mcode* mcompiler_compile_block(struct mast** block, int block_size, struct mcompiler *compiler, struct menvi *envi);

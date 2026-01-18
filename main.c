@@ -12,6 +12,7 @@
 #include "./backend/meval.h"
 #include "./backend/mvm.h"
 
+
 int main(int argc, char** argv) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <source-file>\n", argv[0]);
@@ -32,6 +33,7 @@ int main(int argc, char** argv) {
     ProtoInit(proto);
 
     ProtoRunCode(proto, code->bytecode, code->size);
+
 
     return 0;
 }

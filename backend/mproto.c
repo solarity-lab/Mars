@@ -31,6 +31,8 @@ struct ProtoFormat *ProtoNew(void) {
     proto->labels.count = 0;
     proto->labels.labels = NULL;
 
+    proto->grid = NULL;
+
     proto->gc = NULL;
     return proto;
 }

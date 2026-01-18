@@ -9,15 +9,14 @@ struct keyword {
     enum TOKEN type;
 };
 static struct keyword keywords[] = {
-    {"SELECT",   T_SELECT},
-    {"FROM",     T_FROM},
-    {"WHERE",    T_WHERE},
-    {"EXPORT",   T_EXPORT},
-    {"PARSE",    T_PARSE},
-    {"IMPORT",   T_IMPORT},
-    {"TABLE",    T_TABLE},
-    {"CREATE",   T_CREAT},
-    {"MULTI",    T_MULTI},
+    {"MOVE",     T_MOVE},
+    {"CREAT",    T_CREATE},
+    {"CLOSE",    T_CLOSE},
+    {"TO",       T_TO},
+    {"WRITE",    T_WRITE},
+    {"READ",     T_READ},
+    {"ERASE",    T_ERASE},
+
     {"PRINT",    T_PRINT},
     {"SCAN",     T_SCAN},
 
@@ -25,20 +24,11 @@ static struct keyword keywords[] = {
     {"if",       T_IF},
     {"then",     T_THEN},
     {"else",     T_ELSE},
-    {"for",      T_FOR},
-    {"in",       T_IN},
     {"break",    T_BREAK},
     {"continue", T_CONTINUE},
     {"do",       T_DO},
     {"end",      T_END},
-    {"let",      T_LET},
-    {"function", T_FUNC},
-    {"return",   T_RETURN},
-    {"true",     T_TRUE},
-    {"false",    T_FALSE},
-    {"and",      T_AND},
-    {"or",       T_OR},
-    {"not",      T_NOT},
+
     {NULL,       T_NONE}
 };
 

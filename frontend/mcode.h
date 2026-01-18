@@ -32,4 +32,6 @@ int mcode_print(struct mcode* mcode);
 
 int __mcode(struct mcode* mcode, ...);
 
+struct mcode* __mcode_create(int first, ...);
+
 #endif // MCODE

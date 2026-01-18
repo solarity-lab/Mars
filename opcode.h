@@ -46,4 +46,12 @@
 #define OKNEG '\x27'
 #define OKNOT '\x28'
 
+// control
+#define CCMOVE_TO '\x29'
+#define CCWRITE '\x2a'
+#define CCERASE '\x2b'
+#define CCCREATE '\x2c'
+#define CCREAD '\x2d'
+#define CCCLOSE '\x2e'
+
 #endif // OPCODE_H

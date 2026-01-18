@@ -42,16 +42,6 @@ enum TOKEN {
     
     T_ASSIGN,
 
-    T_SELECT,
-    T_FROM,
-    T_WHERE,
-    T_EXPORT,
-    T_PARSE,
-    T_IMPORT,
-    T_TABLE,
-    T_CREAT,
-    T_MULTI,
-
     T_COMMA,
     T_DOT,
     T_COLON,
@@ -91,6 +81,15 @@ enum TOKEN {
 
     T_PRINT,
     T_SCAN,
+
+    T_MOVE,
+    T_TO,
+    T_WRITE,
+    T_REWRITE,
+    T_READ,
+    T_CREATE,
+    T_CLOSE,
+    T_ERASE,
 
     T_EOF,
 };

@@ -20,6 +20,13 @@ enum AST_TYPE {
     AST_LITERAL,
     AST_PRINT,
     AST_NULL,
+
+    AST_MOVE_CURSOR_TO,
+    AST_GRID_WRITE,
+    AST_GRID_READ,
+    AST_GRID_ERASE,
+    AST_GRID_CREATE,
+    AST_GRID_CLOSE,
 };
 
 #define avalueof(a) ((a)->value)
@@ -61,6 +68,13 @@ struct mast {
 
     struct mast* body;
     struct mast* expr;
+
+    struct mast* row_expr;
+    struct mast* column_expr;
+
+    int line;
+    int row;
+    char* file;
 };
 
 struct mast* mast_new(void);

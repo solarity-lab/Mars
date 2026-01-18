@@ -1,102 +1,133 @@
 #include "mgrid.h"
 
-int GridFree(struct Grid* grid) {
-    ResFree(grid->res1);
-    ResFree(grid->res2);
-    ResFree(grid->res3);
-    free(grid);
-    return 0;
+struct Cursor* CursorNew(void) {
+    struct Cursor* cursor = malloc(sizeof(struct Cursor));
+    cursor->row = 0;
+    cursor->column = 0;
+
+    return cursor;
 }
 
-int ResFree(struct Res* res) {
-    free(res->data);
-    free(res);
-    return 0;
+struct Cursor* CursorMoveTo(struct Cursor* cursor, MarsSize row, MarsSize column) {
+    cursor->row = row;
+    cursor->column = column;
+    return cursor;
 }
 
-struct Res* GridGetRes(struct Grid* grid, enum RES_T _res) {
-    switch (_res) {
-        case RES1:
-            return grid->res1;
-        case RES2:
-            return grid->res2;
-        case RES3:
-            return grid->res3;
-    }    
-
-    return NULL;
-}
-
-struct Res* ResNew(int size) {
-    struct Res* data = malloc(sizeof(struct Res));
-    data->data = malloc(sizeof(struct Object*) * size);
-
-    memset(data->data, 0, sizeof(struct Object*) * size);
-    
-    data->size = size;
-    return data;
-}
-
-struct Grid* GridCreate(int _res1_size, int _res2_size, int _res3_size) {
+struct Grid* GridCreate(MarsSize width, MarsSize height) {
     struct Grid* grid = malloc(sizeof(struct Grid));
-    
-    grid->p._p = 0;
-    grid->p._res = RES1;
 
-    grid->res1 = ResNew(_res1_size);
-    grid->res2 = ResNew(_res2_size);
-    grid->res3 = ResNew(_res3_size);
-    
-    return grid;
-}
+    grid->cursor = CursorNew();
 
-struct Grid* GridMoveTo(struct Grid* grid, int _p, enum RES_T _res) {
-    struct Res* res = GridGetRes(grid, _res);
+    grid->width = width;
+    grid->height = height;
 
-    if (_p >= res->size) {
-        return grid;
-    }
+    grid->data = malloc(width * height * sizeof(struct Object*));
 
-    grid->p._p = _p;
-    grid->p._res = _res;
+    memset(grid->data, 0, width * height * sizeof(struct Object*));
+
+    grid->current = NULL;
 
     return grid;
 }
 
-struct Grid* GridWrite(struct Grid* grid, struct Object* value) {
-    struct Res* res = GridGetRes(grid, grid->p._res);
+/*
+    Grid (width = 5, height = 2)
 
-    struct Object* old = res->data[grid->p._p];
+    Row 0: [1, 2, 3, 4, 5]
+    Row 1: [6, 7, 8, 9, 10]
+
+    move to (row = 1, column = 2) hàng 2, cột 2
+
+    Row 1: [6, 7, (8), 9, 10]
+
+    muốn xuống 1 dòng thì phải đếm từ phẩn tử grid[0] đến grid[width]
+    nếu muốn xuống nữa thì phải đếm từ phần tử grid[0 + width] đến grid[width + width]
+
+    như vật muốn xuống n dòng thì phải đếm từ phần tử grid[0] đến grid[width * n]
+    cộng thêm cột muốn đi nữa thì công thức là:
+
+    [index = row * width + column] 
+    
+    với:
+
+    (row * width):        xuống row dòng
+    (+ column):           dịch sang bên phải column cột
+*/
+
+struct Grid* GridMoveTo(struct Grid* grid, MarsSize row, MarsSize column) {
+    if (row >= grid->height || column >= grid->width)
+        return NULL;
+
+    CursorMoveTo(grid->cursor, row, column);
+
+    grid->current = grid->data[row * grid->width + column];
+    return grid;
+}
+
+struct Grid* ProtoGridWrite(struct ProtoFormat *proto, struct Object* value) {
+    struct Grid* grid = proto->grid;
+
+    struct Object* old = grid->current;
 
     if (old) {
         DECR_REF(old);
-        GCmove(grid->gc, old);
+        GCmove(proto->gc, old);
     }
-
-    res->data[grid->p._p] = value;
 
     INCR_REF(value);
+    grid->current = value;
+
+    grid->data[grid->cursor->row * grid->width + grid->cursor->column] = value;
 
     return grid;
 }
 
-struct Object* GridRead(struct Grid* grid) {
-    struct Res* res = GridGetRes(grid, grid->p._res);
-    return res->data[grid->p._p];
-}
+struct Grid* ProtoGridErase(struct ProtoFormat *proto) {
+    struct Grid* grid = proto->grid;
 
-struct Grid* GridErase(struct Grid* grid) {
-    struct Res* res = GridGetRes(grid, grid->p._res);
-    struct Object* old = res->data[grid->p._p];
-        
-    if (!old) {
-        return grid;
+    struct Object* old = grid->current;
+
+    if (old) {
+        DECR_REF(old);
+        GCmove(proto->gc, old);
     }
 
-    res->data[grid->p._p] = NULL;
-
-    DECR_REF(old);
-    GCmove(grid->gc, old);
-
+    grid->current = NULL;
+    grid->data[grid->cursor->row * grid->width + grid->cursor->column] = NULL;
     return grid;
+}
+void GridPrint(struct Grid* grid) {
+    int w = grid->width;
+    int h = grid->height;
+
+    printf("    ");
+    for (int c = 0; c < w; c++)
+        printf("+--------");
+    printf("+\n");
+
+    for (int r = 0; r < h; r++) {
+        printf("%-3d ", r);
+
+        for (int c = 0; c < w; c++) {
+            struct Object* value = grid->data[r * w + c];
+            if (value)
+                printf("| %6.2f ", value->value);
+            else
+                printf("| %6s ", "Null");
+        }
+        printf("|\n");
+
+        printf("    ");
+        for (int c = 0; c < w; c++)
+            printf("+--------");
+        printf("+\n");
+    }
+}
+
+int GridFree(struct Grid* grid) {
+    free(grid->data);
+    free(grid->cursor);
+    free(grid);
+    return 0;
 }

@@ -67,6 +67,19 @@ struct mcode* mcompiler_compile(struct mast* ast, struct mcompiler *compiler, st
         case AST_FUNCTION: return mcompiler_compile_ast_function_declaration(ast, compiler, envi);
         case AST_RETURN: return mcompiler_compile_ast_return(ast, compiler, envi);
         case AST_PRINT: return mcompiler_compile_ast_PRINT(ast, compiler, envi);
+        case AST_MOVE_CURSOR_TO: return mcompiler_compile_ast_MOVE_TO(ast, compiler, envi);
+        case AST_GRID_WRITE: return mcompiler_compile_ast_WRITE(ast, compiler, envi);
+        case AST_GRID_CREATE: return mcompiler_compile_ast_CREATE(ast, compiler, envi);
+        case AST_GRID_CLOSE: {
+            struct mcode* code = NULL_CODE;
+            PUSH(code, CCCLOSE);
+            return code;
+        }
+        case AST_GRID_READ: {
+            struct mcode* code = NULL_CODE;
+            PUSH(code, CCREAD);
+            return code;
+        }
     }
 
     error_at("Unknown AST node type in compiler", "<main>", 0, 0);
@@ -358,5 +371,39 @@ struct mcode* mcompiler_compile_ast_PRINT(struct mast* ast, struct mcompiler *co
 
     struct mcode* code = mcompiler_compile(ast->expr, compiler, envi);
     PUSH(code, OKPRINT);
+    return code;
+}
+
+struct mcode* mcompiler_compile_ast_WRITE(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
+    CHECKIFNULL(ast);
+
+    struct mcode* code = mcompiler_compile(ast->expr, compiler, envi);
+    PUSH(code, CCWRITE);
+    return code;
+}
+
+struct mcode* mcompiler_compile_ast_MOVE_TO(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
+    CHECKIFNULL(ast);
+
+    struct mcode* code = NULL_CODE;
+
+    INSERT(code, mcompiler_compile(ast->row_expr, compiler, envi));
+    INSERT(code, mcompiler_compile(ast->column_expr, compiler, envi));
+
+    PUSH(code, CCMOVE_TO);
+
+    return code;
+}
+
+struct mcode* mcompiler_compile_ast_CREATE(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
+    CHECKIFNULL(ast);
+
+    struct mcode* code = NULL_CODE;
+
+    INSERT(code, mcompiler_compile(ast->row_expr, compiler, envi));
+    INSERT(code, mcompiler_compile(ast->column_expr, compiler, envi));
+
+    PUSH(code, CCCREATE);
+
     return code;
 }

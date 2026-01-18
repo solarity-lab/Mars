@@ -31,16 +31,33 @@ struct mast* mparser_statement(struct mparser* parser) {
         return mparser_condition(parser);
     }
 
-    if (parser->token->type == T_IF) 
+    else if (parser->token->type == T_IF) 
         return mparser_if_statement(parser);
-    if (parser->token->type == T_WHILE)
+    else if (parser->token->type == T_WHILE)
         return mparser_while_statement(parser);
-    if (parser->token->type == T_FUNC)
+    else if (parser->token->type == T_FUNC)
         return mparser_function_declaration(parser);
-    if (parser->token->type == T_RETURN)
+    else if (parser->token->type == T_RETURN)
         return mparser_return_statement(parser);
-    if (parser->token->type == T_PRINT)
+
+    else if (parser->token->type == T_PRINT)
         return mparser_PRINT(parser);
+    else if (parser->token->type == T_MOVE) 
+        return mparser_MOVE_TO(parser);
+    else if (parser->token->type == T_WRITE)
+        return mparser_WRITE(parser);
+    else if (parser->token->type == T_CREATE)
+        return mparser_CREATE(parser);
+
+    else if (parser->token->type == T_CLOSE) {
+        parser_next_token(parser);
+        return mast_init(AST_GRID_CLOSE, NULL, 0);
+    }
+
+    else if (parser->token->type == T_READ) {
+        parser_next_token(parser);
+        return mast_init(AST_GRID_READ, NULL, 0);
+    }
 
     return mparser_condition(parser);
 }
@@ -69,7 +86,22 @@ struct mast* mparser_block(struct mparser* parser) {
         mast_add_block(block, statement);
     }
 
+    return block;
+}
+
+struct mast* mparser_else_block(struct mparser* parser) {
+    struct mast* block = mast_new();
+
+    block->type = AST_BLOCK;
+
+    parser_expected(parser, T_ELSE);
     parser_next_token(parser);
+
+    while (parser->token->type != T_END) {
+        struct mast* statement = mparser_statement(parser);
+        mast_add_block(block, statement);
+    }
+
     return block;
 }
 
@@ -185,12 +217,14 @@ struct mast* mparser_if_statement(struct mparser* parser) {
 
     mast_not_statement(if_node->condition, pline(parser), prow(parser), pfile(parser));
 
-    if_node->if_body = mparser_block(parser);
+    if_node->if_body = mparser_if_block(parser);
 
     if (parser->token->type == T_ELSE) {
-        parser_next_token(parser);
-        if_node->else_body = mparser_block(parser);
+        if_node->else_body = mparser_else_block(parser);
     }
+
+    parser_expected(parser, T_END);
+    parser_next_token(parser);
 
     return if_node;   
 }
@@ -205,6 +239,9 @@ struct mast* mparser_while_statement(struct mparser* parser) {
     mast_not_statement(while_node->condition, pline(parser), prow(parser), pfile(parser));
 
     while_node->body = mparser_block(parser);
+
+    parser_expected(parser, T_END);
+    parser_next_token(parser);
     return while_node;
 }
 
@@ -234,6 +271,9 @@ struct mast* mparser_function_declaration(struct mparser* parser) {
     parser_expected(parser, T_RPAREN);
     parser_next_token(parser);
     func_node->body = mparser_block(parser);
+
+    parser_expected(parser, T_END);
+    parser_next_token(parser);
     return func_node;
 }
 
@@ -287,4 +327,61 @@ struct mast* mparser_PRINT(struct mparser* parser) {
     print_node->expr = mparser_statement(parser);
     mast_not_statement(print_node->expr, pline(parser), prow(parser), pfile(parser));
     return print_node;
+}
+
+struct mast* mparser_MOVE_TO(struct mparser* parser) {
+    struct mast* move_to_node = mast_init(AST_MOVE_CURSOR_TO, NULL, 0);
+
+    parser_expected(parser, T_MOVE);
+
+    parser_next_token(parser);
+
+    struct mast* row_expr = mparser_statement(parser);
+    mast_not_statement(row_expr, pline(parser), prow(parser), pfile(parser));
+
+    parser_expected(parser, T_COMMA);
+
+    parser_next_token(parser);
+
+    struct mast* col_expr = mparser_statement(parser);
+    mast_not_statement(col_expr, pline(parser), prow(parser), pfile(parser));
+
+    move_to_node->row_expr = row_expr;
+    move_to_node->column_expr = col_expr;
+
+    return move_to_node;
+}
+
+struct mast* mparser_WRITE(struct mparser* parser) {
+    struct mast* write_node = mast_init(AST_GRID_WRITE, NULL, 0);
+
+    parser_expected(parser, T_WRITE);
+
+    parser_next_token(parser);
+    write_node->expr = mparser_statement(parser);
+    mast_not_statement(write_node->expr, pline(parser), prow(parser), pfile(parser));
+    return write_node;
+}
+
+struct mast* mparser_CREATE(struct mparser* parser) {
+    struct mast* write_node = mast_init(AST_GRID_CREATE, NULL, 0);
+
+    parser_expected(parser, T_CREATE);
+
+    parser_next_token(parser);
+
+    struct mast* row_expr = mparser_statement(parser);
+    mast_not_statement(row_expr, pline(parser), prow(parser), pfile(parser));
+
+    parser_expected(parser, T_COMMA);
+
+    parser_next_token(parser);
+
+    struct mast* col_expr = mparser_statement(parser);
+    mast_not_statement(col_expr, pline(parser), prow(parser), pfile(parser));
+
+    write_node->row_expr = row_expr;
+    write_node->column_expr = col_expr;
+
+    return write_node;
 }
