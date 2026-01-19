@@ -152,7 +152,7 @@ struct mast* mparser_factor(struct mparser* parser) {
 struct mast* mparser_term(struct mparser* parser) {
     struct mast* left = mparser_primary(parser);
     parser_next_token(parser);
-    while (parser->token->type == T_TIMES || parser->token->type == T_DIV) {
+    while (parser->token->type == T_TIMES || parser->token->type == T_DIV || parser->token->type == T_MOD) {
         enum TOKEN op = parser->token->type;
         parser_next_token(parser);
         struct mast* right = mparser_primary(parser);

@@ -33,6 +33,7 @@ enum TOKEN {
     T_MINUS,
     T_TIMES,
     T_DIV,
+    T_MOD,
 
     T_LPAREN,
     T_RPAREN,

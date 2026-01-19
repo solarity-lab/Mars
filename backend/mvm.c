@@ -5,6 +5,8 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
 
     proto->labels = ProgramSetLabel(bytecode, size);
 
+    GCActivate(proto->gc);
+
     for (;;) {
         op = bytecode[proto->pc];
 
@@ -17,11 +19,11 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
             case OKMUL: ProtoMul(proto); break;
             case OKMOD: ProtoMod(proto); break;
 
-            case OKGT: ProtoCompare(proto, OKGT); break;
+            case OKGT:  ProtoCompare(proto, OKGT);  break;
             case OKGTE: ProtoCompare(proto, OKGTE); break;
-            case OKLT: ProtoCompare(proto, OKLT); break;
+            case OKLT:  ProtoCompare(proto, OKLT);  break;
             case OKLTE: ProtoCompare(proto, OKLTE); break;
-            case OKEQ: ProtoCompare(proto, OKEQ); break;
+            case OKEQ:  ProtoCompare(proto, OKEQ);  break;
             case OKNEQ: ProtoCompare(proto, OKNEQ); break;
 
             case OKPUSH_NUM: {
@@ -49,7 +51,9 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
             case OKLOAD: {
                 address_t address = bytecode[++proto->pc];
                 struct Object* value = ProtoLoadGlobal(proto, address);
+                
                 ProtoStackPush(proto, value->f_value);
+
                 break;
             }
 
@@ -58,6 +62,7 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
                 struct Object* value = ProtoLoadLocal(proto, address);
 
                 ProtoStackPush(proto, value->f_value);
+                
                 break;
             }
 
@@ -66,13 +71,16 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
                 struct Object* value = ProtoStackTake(proto);
                 
                 ProtoStoreGlobal(proto, address, value, O_GLOBAL);
+
                 break;
             }
 
             case OKSTORE_LOCAL: {
                 address_t address = bytecode[++proto->pc];
                 struct Object* value = ProtoStackTake(proto);
+
                 ProtoStoreLocal(proto, address, value, O_LOCAL);
+
                 break;
             }
 
@@ -99,6 +107,7 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
                 }
 
                 GCmove(proto->gc, value);
+
                 break;
             }
 
@@ -111,10 +120,10 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
 
                 struct Grid* grid = GridCreate(width_value, height_value);
 
-                GCmove(proto->gc, width);
-                GCmove(proto->gc, height);
-
                 proto->grid = grid;
+
+                GCmove(proto->gc, height);
+                GCmove(proto->gc, width);
                 
                 break;
             }
@@ -146,7 +155,7 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
                 int col_index = column->value;
 
                 if (proto->grid) CursorMoveTo(proto->grid->cursor, row_index, col_index);
-                
+
                 GCmove(proto->gc, column);
                 GCmove(proto->gc, row);
                 
@@ -157,8 +166,9 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
                 struct Object* value = ProtoStackTake(proto);
 
                 if (proto->grid) ProtoGridWrite(proto, value);
-                
+
                 GCmove(proto->gc, value);
+
                 break;
             }
 
@@ -166,7 +176,11 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
         }
         
         proto->pc++;
+
+        GCStartClean(proto->gc);
     }
+
+    GCDeactivate(proto->gc);
 
     return proto;
 }

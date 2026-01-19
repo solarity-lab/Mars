@@ -87,6 +87,7 @@ struct mtoken *get_1_char(char c) {
     if (c == '}') return mtoken_init(T_RBRACE, "}", 0.0f);
     if (c == '[') return mtoken_init(T_LBRACKET, "[", 0.0f);
     if (c == ']') return mtoken_init(T_RBRACKET, "]", 0.0f);
+    if (c == '%') return mtoken_init(T_MOD, "percent", 0.0f);
     return NULL;
 }
 

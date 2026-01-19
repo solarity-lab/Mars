@@ -71,7 +71,6 @@ struct Object* ProtoStackTake(struct ProtoFormat* proto) {
     struct Object* pop = proto->s[proto->s_size - 1];
 
     DECR_REF(pop);
-    GCmove(proto->gc, pop);
 
     proto->s_size--;
     return pop;
@@ -108,8 +107,10 @@ struct Object* ProtoStoreGlobal(struct ProtoFormat *proto, address_t address, st
             bao gồm giảm ref count và move to gc
         */
 
-        DECR_REF(old);
-        GCmove(proto->gc, old);
+        if (old) {
+            DECR_REF(old);
+            GCmove(proto->gc, old);
+        }
 
         // tăng tham chiếu cho object gán
         INCR_REF(value);
@@ -155,8 +156,10 @@ struct Object* ProtoStoreLocal(struct ProtoFormat *proto, address_t address, str
     if (object) {
         struct Object* old = object->f_value;
 
-        DECR_REF(old);
-        GCmove(proto->gc, old);
+        if (old) {
+            DECR_REF(old);
+            GCmove(proto->gc, old);
+        }
 
         INCR_REF(value);
 

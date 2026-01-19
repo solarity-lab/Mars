@@ -100,16 +100,17 @@ struct mcode* mcompiler_compile_ast_binary_expression(struct mast* ast, struct m
     INSERT(code, right);
 
     switch (ast->op) {
-        case T_PLUS: PUSH(code, OKADD); break;
+        case T_PLUS:  PUSH(code, OKADD); break;
         case T_MINUS: PUSH(code, OKSUB); break;
-        case T_DIV: PUSH(code, OKDIV); break;
+        case T_DIV:   PUSH(code, OKDIV); break;
         case T_TIMES: PUSH(code, OKMUL); break;
-        case T_GT: PUSH(code, OKGT); break;
-        case T_GTE: PUSH(code, OKGTE); break;
-        case T_LT: PUSH(code, OKLT); break;
-        case T_LTE: PUSH(code, OKLTE); break;
-        case T_EQ: PUSH(code, OKEQ); break;
-        case T_NEQ: PUSH(code, OKNEQ); break;
+        case T_MOD:   PUSH(code, OKMOD); break;
+        case T_GT:    PUSH(code, OKGT);  break;
+        case T_GTE:   PUSH(code, OKGTE); break;
+        case T_LT:    PUSH(code, OKLT);  break;
+        case T_LTE:   PUSH(code, OKLTE); break;
+        case T_EQ:    PUSH(code, OKEQ);  break;
+        case T_NEQ:   PUSH(code, OKNEQ); break;
     }
 
     return code;

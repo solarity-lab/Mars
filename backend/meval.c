@@ -59,8 +59,8 @@ struct Object* ProtoAdd(struct ProtoFormat* proto) {
     struct Object* b = ProtoStackTake(proto);
     struct Object* a = ProtoStackTake(proto);
 
-    GCmove(proto->gc, a);
     GCmove(proto->gc, b);
+    GCmove(proto->gc, a);
 
     struct Object* result = ObjectAdd(a, b);
 
@@ -71,8 +71,8 @@ struct Object* ProtoSub(struct ProtoFormat* proto) {
     struct Object* b = ProtoStackTake(proto);
     struct Object* a = ProtoStackTake(proto);
 
-    GCmove(proto->gc, a);
     GCmove(proto->gc, b);
+    GCmove(proto->gc, a);
 
     struct Object* result = ObjectSub(a, b);
 
@@ -85,8 +85,8 @@ struct Object* ProtoMul(struct ProtoFormat* proto) {
     struct Object* b = ProtoStackTake(proto);
     struct Object* a = ProtoStackTake(proto);
 
-    GCmove(proto->gc, a);
     GCmove(proto->gc, b);
+    GCmove(proto->gc, a);
 
     struct Object* result = ObjectMul(a, b);
 
@@ -99,8 +99,8 @@ struct Object* ProtoDiv(struct ProtoFormat* proto) {
     struct Object* b = ProtoStackTake(proto);
     struct Object* a = ProtoStackTake(proto);
 
-    GCmove(proto->gc, a);
     GCmove(proto->gc, b);
+    GCmove(proto->gc, a);
 
     struct Object* result = ObjectDiv(a, b);
 
@@ -113,8 +113,8 @@ struct Object* ProtoMod(struct ProtoFormat* proto) {
     struct Object* b = ProtoStackTake(proto);
     struct Object* a = ProtoStackTake(proto);
 
-    GCmove(proto->gc, a);
     GCmove(proto->gc, b);
+    GCmove(proto->gc, a);
 
     struct Object* result = ObjectMod(a, b);
 
