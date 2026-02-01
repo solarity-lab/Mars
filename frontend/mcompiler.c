@@ -58,19 +58,57 @@ struct mcode* mcompiler_compile(struct mast* ast, struct mcompiler *compiler, st
     CHECKIFNULL(ast);
 
     switch (ast->type) {
-        case AST_BINARY_EXPRESSION: return mcompiler_compile_ast_binary_expression(ast, compiler, envi);
-        case AST_IDENTIFIER: return mcompiler_compile_ast_identifer(ast, compiler, envi);
-        case AST_LITERAL: return mcompiler_compile_ast_literal(ast, compiler, envi);
-        case AST_ASSIGNMENT: return mcompiler_compile_ast_assign(ast, compiler, envi);
-        case AST_IF: return mcompiler_compile_ast_if(ast, compiler, envi);
-        case AST_WHILE: return mcompiler_compile_ast_while(ast, compiler, envi);
-        case AST_FUNCTION_CALL: return mcompiler_compile_ast_function_call(ast, compiler, envi);
-        case AST_FUNCTION: return mcompiler_compile_ast_function_declaration(ast, compiler, envi);
-        case AST_RETURN: return mcompiler_compile_ast_return(ast, compiler, envi);
-        case AST_PRINT: return mcompiler_compile_ast_PRINT(ast, compiler, envi);
-        case AST_MOVE_CURSOR_TO: return mcompiler_compile_ast_MOVE_TO(ast, compiler, envi);
-        case AST_GRID_WRITE: return mcompiler_compile_ast_WRITE(ast, compiler, envi);
-        case AST_GRID_CREATE: return mcompiler_compile_ast_CREATE(ast, compiler, envi);
+        case AST_BINARY_EXPRESSION: 
+            return mcompiler_compile_ast_binary_expression(ast, compiler, envi);
+        
+        case AST_COMPARE_EXPRESSION: 
+            return mcompiler_compile_ast_compare_expression(ast, compiler, envi);
+        
+        case AST_IDENTIFIER: 
+            return mcompiler_compile_ast_identifer(ast, compiler, envi);
+        
+        case AST_LITERAL: 
+            return mcompiler_compile_ast_literal(ast, compiler, envi);
+        
+        case AST_ASSIGNMENT:
+            return mcompiler_compile_ast_assign(ast, compiler, envi);
+        
+        case AST_IF: 
+            return mcompiler_compile_ast_if(ast, compiler, envi);
+        
+        case AST_WHILE: 
+            return mcompiler_compile_ast_while(ast, compiler, envi);
+        
+        case AST_FUNCTION_CALL: 
+            return mcompiler_compile_ast_function_call(ast, compiler, envi);
+        
+        case AST_FUNCTION: 
+            return mcompiler_compile_ast_function_declaration(ast, compiler, envi);
+        
+        case AST_RETURN: 
+            return mcompiler_compile_ast_return(ast, compiler, envi);
+        
+        case AST_PRINT: 
+            return mcompiler_compile_ast_PRINT(ast, compiler, envi);
+        
+        case AST_MOVE_CURSOR_TO: 
+            return mcompiler_compile_ast_MOVE_TO(ast, compiler, envi);
+        
+        case AST_GRID_WRITE: 
+            return mcompiler_compile_ast_WRITE(ast, compiler, envi);
+        
+        case AST_GRID_CREATE: 
+            return mcompiler_compile_ast_CREATE(ast, compiler, envi);
+        
+        case AST_NOT_EXPRESSION: 
+            return mcompiler_compile_ast_not(ast, compiler, envi);
+        
+        case AST_OR_EXPRESSION: 
+            return mcompiler_compile_ast_or(ast, compiler, envi);
+        
+        case AST_AND_EXPRESSION: 
+            return mcompiler_compile_ast_and(ast, compiler, envi);
+        
         case AST_GRID_CLOSE: {
             struct mcode* code = NULL_CODE;
             PUSH(code, CCCLOSE);
@@ -105,12 +143,40 @@ struct mcode* mcompiler_compile_ast_binary_expression(struct mast* ast, struct m
         case T_DIV:   PUSH(code, OKDIV); break;
         case T_TIMES: PUSH(code, OKMUL); break;
         case T_MOD:   PUSH(code, OKMOD); break;
-        case T_GT:    PUSH(code, OKGT);  break;
-        case T_GTE:   PUSH(code, OKGTE); break;
-        case T_LT:    PUSH(code, OKLT);  break;
-        case T_LTE:   PUSH(code, OKLTE); break;
-        case T_EQ:    PUSH(code, OKEQ);  break;
-        case T_NEQ:   PUSH(code, OKNEQ); break;
+    }
+
+    return code;
+}
+
+struct mcode* mcompiler_compile_ast_compare_expression(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
+    CHECKIFNULL(ast);
+
+    struct mcode* code = NULL_CODE;
+
+    int j = 0;
+    int i = 0;
+    for (;i < ast->opers_size - 1; i++, j++) {
+        struct mcode* left  = mcompiler_compile(ast->opers[i], compiler, envi);
+        struct mcode* right = mcompiler_compile(ast->opers[i + 1], compiler, envi);
+
+        INSERT(code, left);
+        INSERT(code, right);
+
+        enum TOKEN op = ast->ops[j];
+
+        switch (op) {
+            case T_GT:  PUSH(code, OKGT); break;
+            case T_GTE: PUSH(code, OKGTE); break;
+            case T_LT:  PUSH(code, OKLT); break;
+            case T_LTE: PUSH(code, OKLTE); break;
+            case T_NEQ: PUSH(code, OKNEQ); break;
+            case T_EQ:  PUSH(code, OKEQ); break;
+
+            default:
+                error_type(__Mstring("Unknown operator '%d'", op), COMPILER_ERR);
+        }
+
+        if (i > 0) PUSH(code, OKAND);
     }
 
     return code;
@@ -126,7 +192,7 @@ struct mcode* mcompiler_compile_ast_literal(struct mast* ast, struct mcompiler *
     unsigned char float_code[4];
     memcpy(float_code, &value, sizeof(float));
     
-    PUSH(code, OKPUSH_NUM);
+    PUSH(code, OKPUSH_FLOAT);
 
     PUSH(code, float_code[0]);
     PUSH(code, float_code[1]);
@@ -405,4 +471,36 @@ struct mcode* mcompiler_compile_ast_CREATE(struct mast* ast, struct mcompiler *c
     PUSH(code, CCCREATE);
 
     return code;
+}
+
+struct mcode* mcompiler_compile_ast_and(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
+    struct mcode* code = NULL_CODE;
+
+    struct mcode* left = mcompiler_compile(ast->left, compiler, envi);
+    struct mcode* right = mcompiler_compile(ast->right, compiler, envi);
+
+    INSERT(code, left);
+    INSERT(code, right);
+
+    PUSH(code, OKAND);
+    return code;
+}
+
+struct mcode* mcompiler_compile_ast_or(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
+    struct mcode* code = NULL_CODE;
+
+    struct mcode* left = mcompiler_compile(ast->left, compiler, envi);
+    struct mcode* right = mcompiler_compile(ast->right, compiler, envi);
+
+    INSERT(code, left);
+    INSERT(code, right);
+
+    PUSH(code, OKOR);
+    return code;
+}
+
+struct mcode* mcompiler_compile_ast_not(struct mast* ast, struct mcompiler *compiler, struct menvi *envi) {
+    struct mcode* code = mcompiler_compile(ast->expr, compiler, envi);
+    PUSH(code, OKNOT);
+    return code;    
 }

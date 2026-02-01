@@ -117,11 +117,11 @@ int mcode_print(struct mcode* mcode) {
                 break;
             }
 
-            case OKPUSH_NUM: {
+            case OKPUSH_FLOAT: {
                 float value;
                 memcpy(&value, &mcode->bytecode[i], sizeof(float));
                 i += 4;
-                printf("PUSH_NUM %g\n", value);
+                printf("PUSH_FLOAT %g\n", value);
                 break;
             }
 
@@ -143,13 +143,14 @@ int mcode_print(struct mcode* mcode) {
                 break;
             }
 
+
             case CCMOVE_TO: printf("MOVE_TO\n"); break;
             case CCWRITE: printf("WRITE\n"); break;
             case CCERASE: printf("ERASE\n"); break;
             case CCREAD: printf("READ\n"); break;
             case CCCLOSE: printf("CLOSE\n"); break;
             case CCCREATE: printf("CREATE\n"); break;
-            
+    
             case OKRETURN: printf("RETURN\n"); break;
             case OKSTART_FUNC: printf("START_FUNC\n"); break;
             case OKEND_FUNC: printf("END_FUNC\n"); break;
@@ -161,7 +162,10 @@ int mcode_print(struct mcode* mcode) {
             case OKGT:  printf("GT\n"); break;
             case OKGTE: printf("GTE\n"); break;
             case OKPRINT: printf("PRINT\n"); break;
-
+            case OKAND: printf("AND\n"); break;
+            case OKOR: printf("OR\n"); break;
+            case OKNOT: printf("NOT\n"); break;
+            
             default:
                 printf("UNKNOWN\n");
                 break;

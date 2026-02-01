@@ -17,10 +17,10 @@ int ObjectFree(struct Object* object) {
     return 0;
 }
 
-struct Object* ObjectMakeFloat(float f) {
+struct Object* ObjectMakeNumber(Number_t number) {
     struct Object* object = ObjectNew();
     object->type = O_NUMBER;
-    object->value = f;
+    object->value = number;
     return object;
 }
 

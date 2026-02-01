@@ -5,22 +5,41 @@
 #include "mdebug.h"
 
 enum AST_TYPE {
+    /* program */
     AST_PROGRAM,
     AST_BLOCK,
     AST_STATEMENT,
+
+    /* assignment */
     AST_ASSIGNMENT,
+    AST_LET,
+    
+    /* control statement */
     AST_IF,
     AST_WHILE,
-    AST_RETURN,
-    AST_FUNCTION_CALL,
-    AST_FUNCTION,
     AST_FOR,
+
+    /* function */
+    AST_FUNCTION,
+    AST_RETURN,
+
+    /* expression */
     AST_BINARY_EXPRESSION,
+    AST_COMPARE_EXPRESSION,
+    AST_NOT_EXPRESSION,
+    AST_AND_EXPRESSION,
+    AST_OR_EXPRESSION,
+    
+    /* primary */
     AST_IDENTIFIER,
     AST_LITERAL,
+    AST_FUNCTION_CALL,
+
+    /* special */
     AST_PRINT,
     AST_NULL,
 
+    /* grid */
     AST_MOVE_CURSOR_TO,
     AST_GRID_WRITE,
     AST_GRID_READ,
@@ -44,6 +63,13 @@ struct mast {
     struct mast* left;
     struct mast* right;
     enum TOKEN op;
+
+    struct mast** opers;
+    enum TOKEN* ops;
+    int opers_size;
+    int opers_cap;
+    int ops_size;
+    int ops_cap;
 
     struct mast* next;
     struct mast* prev;
@@ -86,10 +112,12 @@ void mast_free(struct mast* mast);
 int mast_add_child(struct mast* mast, struct mast* child);
 int mast_add_block(struct mast* mast, struct mast* child);
 int mast_add_argument(struct mast* mast, struct mast* argument);
+int mast_add_opers(struct mast* mast, struct mast* oper);
+int mast_add_ops(struct mast* mast, enum TOKEN op);
 
 struct mast* mast_binary_expr(struct mast *left, struct mast *right, enum TOKEN op);
 
-int mast_not_statement(struct mast* mast, int line, int row, char* file);
+int merror_not_statement(struct mast* mast, int line, int row, char* file);
 
 int is_ast_expr(struct mast* mast);
 

@@ -29,6 +29,13 @@ static struct keyword keywords[] = {
     {"do",       T_DO},
     {"end",      T_END},
 
+    {"function", T_FUNC},
+    {"return",   T_RETURN},
+
+    {"not",      T_NOT},
+    {"and",      T_AND},
+    {"or",       T_OR},
+
     {NULL,       T_NONE}
 };
 

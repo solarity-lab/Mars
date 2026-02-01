@@ -4,17 +4,17 @@ struct Object *ObjectCompare(struct Object *a, struct Object *b, Instruction op)
     int result = __compare(a, b);
     switch (op) {
         case OKGT:
-            return ObjectMakeFloat(result > 0);
+            return ObjectMakeNumber(result > 0);
         case OKGTE:
-            return ObjectMakeFloat(result >= 0);
+            return ObjectMakeNumber(result >= 0);
         case OKLT:
-            return ObjectMakeFloat(result < 0);
+            return ObjectMakeNumber(result < 0);
         case OKLTE:
-            return ObjectMakeFloat(result <= 0);
+            return ObjectMakeNumber(result <= 0);
         case OKEQ:
-            return ObjectMakeFloat(result == 0);
+            return ObjectMakeNumber(result == 0);
         case OKNEQ:
-            return ObjectMakeFloat(result != 0);
+            return ObjectMakeNumber(result != 0);
     }
 
     return null_obj;

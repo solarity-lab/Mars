@@ -8,41 +8,41 @@
     - Có thể dùng cho hàm, hàm lồng nhau (closure)
 */
 
-#include "mobj.h" // dùng struct MValue cho bảng hằng số
-#include "mars.h" // dùng cho mã máy
-#include "mgc.h"  // Garbage Collector
-#include "mlabel.h" // label
-#include "mgrid.h"
+#include "mobj.h"   /*  cho bảng hằng số, stack, global, ... */
+#include "mars.h"   /* dùng cho mã máy */
+#include "mgc.h"    /* Garbage Collector */
+#include "mlabel.h" /* label */
+#include "mgrid.h"  /* grid */
 
 enum ObjectType;
 struct ProgramLabel;
 
 struct ProtoFormat {
-    struct Object** para;           // tham số (parameter) dùng cho hàm
-    MarsSize para_size;                  // kích thước bộ tham số
+    struct Object** para;                   /* tham số (parameter) dùng cho hàm */
+    MarsSize para_size;                     /* kích thước bộ tham số */
 
-    Instruction* code;              // mã máy thô
+    Instruction* code;                      /* mã máy thô */
 
-    struct Object** s;              // ngăn xếp    
-    struct Object** k;              // bẳng hằng, là nơi lưu trữ dự liệu có sẵn, tối ưu khi tạo value
-    struct Object** g;              // bảng toàn cục, mọi proto đều trỏ chung vô bảng toàn cục chung này
-    struct Object** l;              // bảng cục bộ
+    struct Object** s;                      /* ngăn xếp */
+    struct Object** k;                      /* bẳng hằng, là nơi lưu trữ dự liệu có sẵn, tối ưu khi tạo value */
+    struct Object** g;                      /* bảng toàn cục, mọi proto đều trỏ chung vô bảng toàn cục chung này */
+    struct Object** l;                      /* bảng cục bộ */
 
-    MarsSize s_size;                     // kích thước ngăn xếp
-    MarsSize k_size;                     // kích thước bẳng hằng số
-    MarsSize g_size;                     // kích thước bảng toàn cục
-    MarsSize l_size;                     // kích thước bẳng cục bộ
+    MarsSize s_size;                        /* kích thước ngăn xếp */
+    MarsSize k_size;                        /* kích thước bẳng hằng số */
+    MarsSize g_size;                        /* kích thước bảng toàn cục */
+    MarsSize l_size;                        /* kích thước bẳng cục bộ */
 
     MarsSize s_capacity;
     MarsSize k_capacity;
     MarsSize g_capacity;
     MarsSize l_capacity;
 
-    MarsSize c_size;                     // kích thước mã máy (instruction)
+    MarsSize c_size;                        /* kích thước mã máy (instruction) */
 
-    struct ProtoFormat* prev;       // ProtoFormat trước dùng cho tra các ProtoFormat lồng nhau
+    struct ProtoFormat* prev;               /* ProtoFormat trước dùng cho tra các ProtoFormat lồng nhau */
 
-    int pc;                         // bộ đếm bytecode (program counter)
+    int pc;                                 /* bộ đếm bytecode (program counter) */
 
     struct ProgramLabel labels;
 
@@ -52,18 +52,18 @@ struct ProtoFormat {
 };
 
 /*
-Phần II) Xử lý ProtoFormat
+    Phần II) Xử lý ProtoFormat
 */
 
-#define nextc(p) ((p)->code[(p)->pc++])         // lấy opcode tiếp theo trong instruction
+#define nextc(p) ((p)->code[(p)->pc++])         /* lấy opcode tiếp theo trong instruction */
 
-#define curc(p) ((p)->code[(p)->pc])            // lấy opcode hiện tại
+#define curc(p) ((p)->code[(p)->pc])            /* lấy opcode hiện tại */
 
-#define prevc(p) ((p)->pc--)                    // giảm pc, cho backward opcode
+#define prevc(p) ((p)->pc--)                    /* giảm pc, cho backward opcode */
 
-#define jump(p, offset) ((p)->pc = (offset))    // nhảy đến thứ tự cố định
+#define jump(p, offset) ((p)->pc = (offset))    /* nhảy đến thứ tự cố định */
 
-struct ProtoFormat *ProtoNew(void);             // hey why dont write commnet abiut me?
+struct ProtoFormat *ProtoNew(void);             /* hey why dont write commnet abiut me? */
 
 /*
     Khởi tạo ProtoFormat bao gồm:
@@ -112,6 +112,6 @@ struct Object* ProtoStoreLocal(struct ProtoFormat *proto, address_t address, str
     Các hàm hỗ trợ khác
 */
 
-int ProtoPushNum(struct ProtoFormat* proto, float f);
+int ProtoPushNum(struct ProtoFormat* proto, Number_t number);
 
-#endif // MPROTO_H
+#endif /* MPROTO_H */

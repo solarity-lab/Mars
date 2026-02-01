@@ -24,49 +24,49 @@ int parser_free(struct mparser* parser) {
 }
 
 struct mast* mparser_statement(struct mparser* parser) {
-    if (parser->token->type == T_IDENTIFIER) {
+    if (ptok_t(parser) == T_IDENTIFIER) {
         parser->next = lookahead(parser->lexer);
         if (parser->next->type == T_ASSIGN) return mparser_assign(parser);
 
         return mparser_condition(parser);
     }
 
-    else if (parser->token->type == T_IF) 
+    else if (ptok_t(parser) == T_IF) 
         return mparser_if_statement(parser);
-    else if (parser->token->type == T_WHILE)
+    else if (ptok_t(parser) == T_WHILE)
         return mparser_while_statement(parser);
-    // else if (parser->token->type == T_FUNC)
-        // return mparser_function_declaration(parser);
-    // else if (parser->token->type == T_RETURN)
-        // return mparser_return_statement(parser);
+    else if (ptok_t(parser) == T_FUNC)
+        return mparser_function_declaration(parser);
+    else if (ptok_t(parser) == T_RETURN)
+        return mparser_return_statement(parser);
 
-    else if (parser->token->type == T_PRINT)
+    else if (ptok_t(parser) == T_PRINT)
         return mparser_PRINT(parser);
-    else if (parser->token->type == T_MOVE) 
+    else if (ptok_t(parser) == T_MOVE) 
         return mparser_MOVE_TO(parser);
-    else if (parser->token->type == T_WRITE)
+    else if (ptok_t(parser) == T_WRITE)
         return mparser_WRITE(parser);
-    else if (parser->token->type == T_CREATE)
+    else if (ptok_t(parser) == T_CREATE)
         return mparser_CREATE(parser);
 
-    else if (parser->token->type == T_CLOSE) {
+    else if (ptok_t(parser) == T_CLOSE) {
         parser_next_token(parser);
         return mast_init(AST_GRID_CLOSE, NULL, 0);
     }
 
-    else if (parser->token->type == T_READ) {
+    else if (ptok_t(parser) == T_READ) {
         parser_next_token(parser);
         return mast_init(AST_GRID_READ, NULL, 0);
     }
 
-    return mparser_condition(parser);
+    return mparser_logical(parser);
 }
 
 struct mast* mparser_parse(struct mparser* parser) {
     struct mast* program = mast_new();
     program->type = AST_PROGRAM;
     parser_next_token(parser);
-    while (parser->token->type != T_EOF) {
+    while (ptok_t(parser) != T_EOF) {
         struct mast* statement = mparser_statement(parser);
         mast_add_child(program, statement);
     }
@@ -81,7 +81,7 @@ struct mast* mparser_block(struct mparser* parser) {
     parser_expected(parser, T_DO);
     parser_next_token(parser);
 
-    while (parser->token->type != T_END) {
+    while (ptok_t(parser) != T_END) {
         struct mast* statement = mparser_statement(parser);
         mast_add_block(block, statement);
     }
@@ -97,7 +97,7 @@ struct mast* mparser_else_block(struct mparser* parser) {
     parser_expected(parser, T_ELSE);
     parser_next_token(parser);
 
-    while (parser->token->type != T_END) {
+    while (ptok_t(parser) != T_END) {
         struct mast* statement = mparser_statement(parser);
         mast_add_block(block, statement);
     }
@@ -114,12 +114,16 @@ struct mast* mparser_if_block(struct mparser* parser) {
 
     parser_next_token(parser);
 
-    while (parser->token->type != T_END && parser->token->type != T_ELSE) {
+    while (ptok_t(parser) != T_END && ptok_t(parser) != T_ELSE) {
         struct mast* statement = mparser_statement(parser);
         mast_add_block(block, statement);
     }
 
     return block;
+}
+
+struct mast* mparser_logical(struct mparser* parser) {
+    return mparser_or(parser);
 }
 
 struct mast* mparser_primary(struct mparser* parser) {
@@ -130,30 +134,93 @@ struct mast* mparser_primary(struct mparser* parser) {
         parser_next_token(parser);
         return mparser_function_call(parser, node);
     }
+
     return node;
 }
 
 struct mast* mparser_factor(struct mparser* parser) {
-    if (parser->token->type == T_NUMBER) 
+    if (ptok_t(parser) == T_NUMBER) 
         return mast_init(AST_LITERAL, parser->token->lexeme, parser->token->value);
-    if (parser->token->type == T_IDENTIFIER) 
+    if (ptok_t(parser) == T_IDENTIFIER) 
         return mast_init(AST_IDENTIFIER, parser->token->lexeme, parser->token->value);
-    if (parser->token->type == T_LPAREN) {
+    if (ptok_t(parser) == T_LPAREN) {
         parser_next_token(parser);
         struct mast* expr = mparser_expr(parser);
         parser_expected(parser, T_RPAREN);
         return expr;
+    }
+
+    if (ptok_t(parser) == T_NOT) {
+        return mparser_not(parser);
     }
     
     error_at("Unexpected token", pfile(parser), pline(parser), prow(parser));
     return NULL;
 }
 
+struct mast* mparser_not(struct mparser* parser) {
+    if (ptok_t(parser) != T_NOT) {
+        return mparser_condition(parser);
+    }
+
+    struct mast* node = mast_init(AST_NOT_EXPRESSION, NULL, 0);
+
+    parser_next_token(parser);
+
+    node->expr = mparser_statement(parser);
+    
+    merror_not_statement(node->expr, pline(parser), prow(parser), pfile(parser));
+
+    return node;
+}
+
+struct mast* mparser_and(struct mparser* parser) {
+    struct mast* node = mparser_not(parser);
+
+    while (ptok_t(parser) == T_AND) {
+        struct mast* and_node = mast_init(AST_AND_EXPRESSION, NULL, 0);
+
+        parser_next_token(parser);
+
+        and_node->left = node;
+        and_node->right = mparser_parse(parser);
+
+        merror_not_statement(and_node->right, pline(parser), prow(parser), pfile(parser));
+
+        node = and_node;
+
+        return node;
+    }
+
+    return node;
+}
+
+struct mast* mparser_or(struct mparser* parser) {
+    struct mast* node = mparser_and(parser);
+
+    while (ptok_t(parser) == T_OR) {
+        struct mast* or_node = mast_init(AST_OR_EXPRESSION, NULL, 0);
+
+        parser_next_token(parser);
+
+        or_node->left = node;
+        or_node->right = mparser_parse(parser);
+
+        merror_not_statement(or_node->right, pline(parser), prow(parser), pfile(parser));
+
+        node = or_node;
+
+        return node;
+    }
+
+    return node;
+}
+
 struct mast* mparser_term(struct mparser* parser) {
     struct mast* left = mparser_primary(parser);
     parser_next_token(parser);
-    while (parser->token->type == T_TIMES || parser->token->type == T_DIV || parser->token->type == T_MOD) {
-        enum TOKEN op = parser->token->type;
+    while (ptok_t(parser) == T_TIMES || ptok_t(parser) == T_DIV || ptok_t(parser) == T_MOD) {
+        enum TOKEN op = ptok_t(parser);
         parser_next_token(parser);
         struct mast* right = mparser_primary(parser);
         left = mast_binary_expr(left, right, op);
@@ -164,8 +231,8 @@ struct mast* mparser_term(struct mparser* parser) {
 
 struct mast* mparser_expr(struct mparser* parser) {
     struct mast* left = mparser_term(parser);
-    while (parser->token->type == T_PLUS || parser->token->type == T_MINUS) {
-        enum TOKEN op = parser->token->type;
+    while (ptok_t(parser) == T_PLUS || ptok_t(parser) == T_MINUS) {
+        enum TOKEN op = ptok_t(parser);
         parser_next_token(parser);
         struct mast* right = mparser_term(parser);
         left = mast_binary_expr(left, right, op);
@@ -174,19 +241,37 @@ struct mast* mparser_expr(struct mparser* parser) {
 }
     
 struct mast* mparser_condition(struct mparser* parser) {
-    struct mast* lexer = mparser_expr(parser);
-    while (parser->token->type == T_EQ 
-            || parser->token->type == T_NEQ 
-            || parser->token->type == T_LT 
-            || parser->token->type == T_LTE 
-            || parser->token->type == T_GT 
-            || parser->token->type == T_GTE) {
-        enum TOKEN op = parser->token->type;
+    struct mast* node = mast_init(AST_COMPARE_EXPRESSION, NULL, 0);
+    
+    struct mast* first = mparser_expr(parser);
+
+    mast_add_opers(node, first);
+
+    int has_op = 0;
+
+    while (ptok_t(parser) == T_GT 
+    || ptok_t(parser) == T_GTE 
+    || ptok_t(parser) == T_LT 
+    || ptok_t(parser) == T_LTE
+    || ptok_t(parser) == T_NEQ
+    || ptok_t(parser) == T_EQ) 
+    
+    {
+        has_op = 1;
+
+        enum TOKEN op = ptok_t(parser);
+        mast_add_ops(node, op);
+
         parser_next_token(parser);
-        struct mast* right = mparser_expr(parser);
-        lexer = mast_binary_expr(lexer, right, op); 
+
+        struct mast* oper = mparser_expr(parser);
+
+        mast_add_opers(node, oper);
     }
-    return lexer;
+
+    if (!has_op) return first;
+
+    return node;
 }
 
 struct mast* mparser_assign(struct mparser* parser) {
@@ -201,7 +286,7 @@ struct mast* mparser_assign(struct mparser* parser) {
     parser_next_token(parser);
     
     struct mast* value = mparser_statement(parser);
-    mast_not_statement(value, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(value, pline(parser), prow(parser), pfile(parser));
     node->expr = value;
     return node;
 }
@@ -215,11 +300,11 @@ struct mast* mparser_if_statement(struct mparser* parser) {
     parser_next_token(parser);
     if_node->condition = mparser_statement(parser);
 
-    mast_not_statement(if_node->condition, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(if_node->condition, pline(parser), prow(parser), pfile(parser));
 
     if_node->if_body = mparser_if_block(parser);
 
-    if (parser->token->type == T_ELSE) {
+    if (ptok_t(parser) == T_ELSE) {
         if_node->else_body = mparser_else_block(parser);
     }
 
@@ -236,7 +321,7 @@ struct mast* mparser_while_statement(struct mparser* parser) {
 
     parser_next_token(parser);
     while_node->condition = mparser_statement(parser);
-    mast_not_statement(while_node->condition, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(while_node->condition, pline(parser), prow(parser), pfile(parser));
 
     while_node->body = mparser_block(parser);
 
@@ -258,12 +343,12 @@ struct mast* mparser_function_declaration(struct mparser* parser) {
     parser_expected(parser, T_LPAREN);
 
     parser_next_token(parser);
-    while (parser->token->type != T_RPAREN) {
+    while (ptok_t(parser) != T_RPAREN) {
         parser_expected(parser, T_IDENTIFIER);
         func_node->parameters[func_node->parameter_count++] = parser->token->lexeme;
 
         parser_next_token(parser);
-        if (parser->token->type == T_COMMA) {
+        if (ptok_t(parser) == T_COMMA) {
             parser_next_token(parser);
         }
     }
@@ -285,12 +370,12 @@ struct mast* mparser_function_call(struct mparser* parser, struct mast* callee) 
     parser_expected(parser, T_LPAREN);
 
     parser_next_token(parser);
-    while (parser->token->type != T_RPAREN) {
+    while (ptok_t(parser) != T_RPAREN) {
         struct mast* arg = mparser_statement(parser);
-        mast_not_statement(arg, pline(parser), prow(parser), pfile(parser));
+        merror_not_statement(arg, pline(parser), prow(parser), pfile(parser));
         mast_add_argument(call_node, arg);
 
-        if (parser->token->type == T_COMMA) {
+        if (ptok_t(parser) == T_COMMA) {
             parser_next_token(parser);
         }
     }
@@ -313,7 +398,7 @@ struct mast* mparser_return_statement(struct mparser* parser) {
 
     parser_next_token(parser);
     return_node->expr = mparser_statement(parser);
-    mast_not_statement(return_node->expr, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(return_node->expr, pline(parser), prow(parser), pfile(parser));
 
     return return_node;
 }
@@ -325,7 +410,7 @@ struct mast* mparser_PRINT(struct mparser* parser) {
 
     parser_next_token(parser);
     print_node->expr = mparser_statement(parser);
-    mast_not_statement(print_node->expr, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(print_node->expr, pline(parser), prow(parser), pfile(parser));
     return print_node;
 }
 
@@ -337,14 +422,14 @@ struct mast* mparser_MOVE_TO(struct mparser* parser) {
     parser_next_token(parser);
 
     struct mast* row_expr = mparser_statement(parser);
-    mast_not_statement(row_expr, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(row_expr, pline(parser), prow(parser), pfile(parser));
 
     parser_expected(parser, T_COMMA);
 
     parser_next_token(parser);
 
     struct mast* col_expr = mparser_statement(parser);
-    mast_not_statement(col_expr, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(col_expr, pline(parser), prow(parser), pfile(parser));
 
     move_to_node->row_expr = row_expr;
     move_to_node->column_expr = col_expr;
@@ -359,7 +444,7 @@ struct mast* mparser_WRITE(struct mparser* parser) {
 
     parser_next_token(parser);
     write_node->expr = mparser_statement(parser);
-    mast_not_statement(write_node->expr, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(write_node->expr, pline(parser), prow(parser), pfile(parser));
     return write_node;
 }
 
@@ -371,14 +456,14 @@ struct mast* mparser_CREATE(struct mparser* parser) {
     parser_next_token(parser);
 
     struct mast* row_expr = mparser_statement(parser);
-    mast_not_statement(row_expr, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(row_expr, pline(parser), prow(parser), pfile(parser));
 
     parser_expected(parser, T_COMMA);
 
     parser_next_token(parser);
 
     struct mast* col_expr = mparser_statement(parser);
-    mast_not_statement(col_expr, pline(parser), prow(parser), pfile(parser));
+    merror_not_statement(col_expr, pline(parser), prow(parser), pfile(parser));
 
     write_node->row_expr = row_expr;
     write_node->column_expr = col_expr;

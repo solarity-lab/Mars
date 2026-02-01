@@ -12,6 +12,13 @@ struct mast* mast_new(void) {
     mast->block_size = 1024;
     mast->block = calloc(1024, sizeof(struct mast*));
 
+    mast->opers = calloc(1024, sizeof(struct mast*));
+    mast->ops = malloc(sizeof(enum TOKEN) * 1024);
+    mast->opers_cap = 1024;
+    mast->ops_cap = 1024;
+    mast->opers_size = 0;
+    mast->ops_size = 0;
+
     mast->index = 0;
     mast->size = 1024;
     mast->parent = calloc(1024, sizeof(struct mast*));
@@ -94,6 +101,22 @@ int mast_add_argument(struct mast* mast, struct mast* argument) {
     return 0;
 }
 
+int mast_add_opers(struct mast* mast, struct mast* oper) {
+    ensure_capacity((void**)&mast->opers, &mast->opers_cap, sizeof(struct mast*), mast->opers_size);
+    mast->opers[mast->opers_size++] = oper;
+    return 0;
+}
+
+int mast_add_ops(struct mast* mast, enum TOKEN op) {
+    if (mast->ops_size >= mast->ops_cap) {
+        mast->ops_cap *= 2;
+        mast->ops = realloc(mast->ops, mast->ops_cap * sizeof(enum TOKEN));
+    }
+
+    mast->ops[mast->ops_size++] = op;
+    return 0;
+}
+
 struct mast* mast_binary_expr(struct mast *left, struct mast *right, enum TOKEN op) {
     struct mast* mast = mast_new();
 
@@ -115,6 +138,10 @@ int is_ast_expr(struct mast* mast) {
     if (type == AST_BINARY_EXPRESSION 
         || type == AST_FUNCTION_CALL
         || type == AST_IDENTIFIER
+        || type == AST_NOT_EXPRESSION
+        || type == AST_AND_EXPRESSION
+        || type == AST_OR_EXPRESSION
+        || type == AST_COMPARE_EXPRESSION
         || type == AST_LITERAL
         || type == AST_NULL) {
         return 1;
@@ -122,7 +149,7 @@ int is_ast_expr(struct mast* mast) {
     return 0;
 }
 
-int mast_not_statement(struct mast* mast, int line, int row, char* file) {
+int merror_not_statement(struct mast* mast, int line, int row, char* file) {
     if (!mast) return 0;
 
     if (is_ast_expr(mast)) {

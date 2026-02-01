@@ -186,7 +186,7 @@ struct Object* ProtoStoreLocal(struct ProtoFormat *proto, address_t address, str
     return scope;
 }
 
-int ProtoPushNum(struct ProtoFormat* proto, float f) {
-    struct Object* num = ObjectMakeFloat(f);
+int ProtoPushNum(struct ProtoFormat* proto, Number_t number) {
+    struct Object* num = ObjectMakeNumber(number);
     return ProtoStackPush(proto, num);
 }

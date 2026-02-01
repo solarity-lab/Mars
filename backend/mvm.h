@@ -8,6 +8,7 @@
 #include "mproto.h"
 #include "mobj.h"
 #include "meval.h"
+#include "mlogic.h"
 #include "mcompare.h"
 
 #include "../../Mars/opcode.h"

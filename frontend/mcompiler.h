@@ -41,8 +41,14 @@ struct mcode* mcompiler_compile_ast_program(struct mast* ast, struct mcompiler *
 // compile general
 struct mcode* mcompiler_compile(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
 
-// binary expression
+// binary expression and compare expression
 struct mcode* mcompiler_compile_ast_binary_expression(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
+struct mcode* mcompiler_compile_ast_compare_expression(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
+
+// and, or, not logical
+struct mcode* mcompiler_compile_ast_and(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
+struct mcode* mcompiler_compile_ast_or(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
+struct mcode* mcompiler_compile_ast_not(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);
 
 // expression
 struct mcode* mcompiler_compile_ast_literal(struct mast* ast, struct mcompiler *compiler, struct menvi *envi);

@@ -28,12 +28,12 @@ enum ObjectType {
 };
 
 struct Object {
-    int ref_count;          // số lượng tham chiếu dùng cho GC
+    int ref_count;              // số lượng tham chiếu dùng cho GC
 
-    address_t address;      // địa chỉ ảo, dùng cho biến
+    address_t address;          // địa chỉ ảo, dùng cho biến
 
-    enum ObjectType type;   // kiểu dữ liệu của object
-    float value;            // giá trị chính của object
+    enum ObjectType type;       // kiểu dữ liệu của object
+    Number_t value;            // giá trị chính của object
 
     struct Object* f_value; // giá trị của biến, biến sẽ có dự liệu tham chiếu đến field này
 
@@ -49,7 +49,7 @@ struct Object {
 */
 struct Object* ObjectNew(void);
 
-struct Object* ObjectMakeFloat(float f);
+struct Object* ObjectMakeNumber(Number_t number);
 struct Object* ObjectMakeBool(int _b);
 
 // hàm giải phóng

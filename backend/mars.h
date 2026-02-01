@@ -14,28 +14,6 @@
     - File này định nghĩa API
 */
 
-
-/*
-    Định nghĩa kiểu dữ liệu cơ bản
-*/
-
-typedef int             address_t;          // địa chỉ ảo cho Virtual Machine
-typedef unsigned char   Instruction;        // Bytecode cho máy ảo
-
-/*
-    kiểu cờ 1 byte, dùng cho các field, flag chỉ có giá trị 0 hoặc 1
-*/
-
-typedef unsigned char    Flag;
-
-#define FTRUE            1u         // 1 (true)
-#define FFALSE           0u         // 0 (false)
-
-/*
-    FTRUE: Trả về 1 (true) như chuẩn C
-    FFALSE: Trả về 0 (false) dùng cho malloc fail, ...
-*/
-
 #if defined(UINT64_MAX) // nếu là máy 64-bit thì dùng uint64_t
     typedef uint64_t MarsSize;
     
@@ -50,6 +28,35 @@ typedef unsigned char    Flag;
     
     #define MARS_SIZE_BITS 0       
 #endif
+
+/*
+    Kieu du lieu so cho object
+*/
+
+typedef double Number_t;
+
+
+/*
+    Định nghĩa kiểu dữ liệu cơ bản
+*/
+
+typedef int             address_t;          // địa chỉ ảo cho Virtual Machine
+typedef unsigned char   Instruction;        // Bytecode cho máy ảo
+
+/*
+    kiểu cờ 1 byte, dùng cho các field, flag chỉ có giá trị 0 hoặc 1
+*/
+
+typedef unsigned char    Flag;
+
+
+/*
+    FTRUE: Trả về 1 (true) như chuẩn C
+    FFALSE: Trả về 0 (false) dùng cho malloc fail, ...
+*/
+
+#define FTRUE            1u         // 1 (true)
+#define FFALSE           0u         // 0 (false)
 
 
 /*

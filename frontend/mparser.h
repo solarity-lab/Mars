@@ -22,6 +22,8 @@ struct mparser {
 #define pline(parser) (parser->lexer->line)
 #define prow(parser) (parser->lexer->row)
 #define pfile(parser) (parser->lexer->file)
+#define ptok_t(parser) (parser->token->type)
+#define ptok(parser) (parser->token)
 
 struct mparser* mparser_new(struct mlexer* l);
 
@@ -32,10 +34,18 @@ int parser_expected(struct mparser *parser, enum TOKEN type);
 struct mast* mparser_statement(struct mparser* parser);
 struct mast* mparser_parse(struct mparser* parser);
 
+// logic
+struct mast* mparser_logical(struct mparser* parser);
+
 // block
 struct mast* mparser_block(struct mparser* parser);
 struct mast* mparser_if_block(struct mparser* parser);
 struct mast* mparser_else_block(struct mparser* parser);
+
+// primary
+struct mast* mparser_not(struct mparser* parser);
+struct mast* mparser_and(struct mparser* parser);
+struct mast* mparser_or(struct mparser* parser);
 
 // expression
 struct mast* mparser_factor(struct mparser* parser);

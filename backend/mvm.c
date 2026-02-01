@@ -26,7 +26,47 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
             case OKEQ:  ProtoCompare(proto, OKEQ);  break;
             case OKNEQ: ProtoCompare(proto, OKNEQ); break;
 
-            case OKPUSH_NUM: {
+            case OKAND: {
+                struct Object* b = ProtoStackTake(proto);
+                struct Object* a = ProtoStackTake(proto);
+
+                GCmove(proto->gc, b);
+                GCmove(proto->gc, a);
+
+                struct Object* result = ObjectLogicAnd(a, b);
+
+                ProtoStackPush(proto, result);
+
+                break;
+            }
+
+            case OKOR: {
+                struct Object* b = ProtoStackTake(proto);
+                struct Object* a = ProtoStackTake(proto);
+
+                GCmove(proto->gc, b);
+                GCmove(proto->gc, a);
+
+                struct Object* result = ObjectLogicOr(a, b);
+
+                ProtoStackPush(proto, result);
+
+                break;
+            }
+
+            case OKNOT: {
+                struct Object* value = ProtoStackTake(proto);
+
+                GCmove(proto->gc, value);
+
+                struct Object* result = ObjectLogicNot(value);
+
+                ProtoStackPush(proto, result);
+
+                break;
+            }
+
+            case OKPUSH_FLOAT: {
                 uint8_t b[4];
                 b[0] = bytecode[++proto->pc];
                 b[1] = bytecode[++proto->pc];
@@ -36,10 +76,11 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
                 float value;
                 memcpy(&value, b, sizeof(float));
 
-                ProtoPushNum(proto, value);
+                ProtoPushNum(proto, (Number_t) value);
 
                 break;
             }
+
             case OKPRINT: {
                 struct Object* value = ProtoStackTake(proto);
                 printf("%g\n", value->value);
@@ -141,7 +182,7 @@ struct ProtoFormat* ProtoRunCode(struct ProtoFormat* proto, Instruction *bytecod
                 struct Grid* grid = proto->grid;
 
                 if (grid) {
-                    GridFree(grid);
+                    ProtoGridFree(proto, grid);
                     proto->grid = NULL;
                 }
                 break;

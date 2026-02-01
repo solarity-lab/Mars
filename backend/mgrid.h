@@ -36,6 +36,6 @@ struct Grid* ProtoGridErase(struct ProtoFormat *proto);
 
 void GridPrint(struct Grid* grid);
 
-int GridFree(struct Grid* grid);
+int ProtoGridFree(struct ProtoFormat* proto, struct Grid* grid);
 
 #endif // MGRID_H

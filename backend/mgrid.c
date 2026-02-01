@@ -125,7 +125,20 @@ void GridPrint(struct Grid* grid) {
     }
 }
 
-int GridFree(struct Grid* grid) {
+int ProtoGridFree(struct ProtoFormat* proto, struct Grid* grid) {
+    for (int i = 0; i < grid->width * grid->height; i++) {
+        struct Object* value = grid->data[i];
+        if (value) {
+            DECR_REF(value);
+            GCmove(proto->gc, value);
+        }
+    }
+
+    grid->width = 0;
+    grid->height = 0;
+
+    grid->current = NULL;
+
     free(grid->data);
     free(grid->cursor);
     free(grid);
